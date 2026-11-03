@@ -1,0 +1,39 @@
+# frozen_string_literal: true
+
+FactoryBot.define do
+  factory :admin, class: "User" do
+    password { "Passw0rd" }
+    sequence(:username) { |n| "admin_#{n}" }
+    sequence(:email) { |n| "admin_#{n}@example.com" }
+    admin { true }
+  end
+
+  factory :student, class: "Student" do
+    type { "Student" }
+    password { "Passw0rd" }
+    classroom { create(:classroom, :with_trading) }
+    sequence(:username) { |n| "student_#{n}" }
+    sequence(:email) { |n| "student_#{n}@example.com" }
+
+    trait :with_portfolio do
+      after(:create) do |student|
+        create(:portfolio, user: student)
+      end
+    end
+
+    trait :without_enrollment do
+      classroom { nil }
+    end
+
+    trait :discarded do
+      discarded_at { Time.current }
+    end
+  end
+
+  factory :teacher, class: "Teacher" do
+    type { "Teacher" }
+    password { "Passw0rd" }
+    classroom { create(:classroom) }
+    sequence(:email) { |n| "teacher_#{n}@example.com" }
+  end
+end

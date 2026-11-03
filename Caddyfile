@@ -1,0 +1,7 @@
+{$DOMAIN} {
+	header X-Robots-Tag "noindex, nofollow"
+	respond /robots.txt "User-agent: *
+Disallow: /
+"
+	reverse_proxy app:3000
+}

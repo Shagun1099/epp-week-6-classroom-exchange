@@ -1,0 +1,39 @@
+<%= turbo_frame_tag @grade_book do %>
+  <div class="mt-8"
+    <% unless @grade_book.completed? %>
+      data-controller="autosave"
+      data-autosave-interval-value="30000"
+    <% end %>>
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-medium text-gray-900">Grade Book</h3>
+      <div data-autosave-target="status" class="text-sm text-gray-500"></div>
+    </div>
+
+    <%= form_with model: [@classroom, @grade_book],
+                  url: classroom_grade_book_path(@classroom, @grade_book),
+                  method: :patch,
+                  html: { data: { autosave_target: "form" } } do |f| %>
+
+      <%= render partial: "table", locals: { grade_book: @grade_book } %>
+
+      <br>
+
+      <div class="flex flex-col items-center">
+        <%= render partial: "submit_button" %>
+      </div>
+    <% end %>
+
+    <% if current_user.admin? %>
+      <div class="flex flex-col items-center pt-4">
+        <%= render partial: "finalize_button" %>
+      </div>
+
+      <div class="flex flex-col items-center pt-6 mt-6 border-t border-gray-200">
+        <p class="text-sm text-gray-500 mb-3 text-center">
+          If this quarter's grades never arrived, give every student the same amount instead.
+        </p>
+        <%= render partial: "flat_allotment_form" %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

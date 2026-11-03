@@ -1,0 +1,202 @@
+---
+en:
+  activerecord:
+    attributes:
+      portfolio_transaction:
+        reasons:
+          administrative_adjustments: Administrative Adjustment
+          attendance_earnings: Earnings from Attendance
+          awards: Award
+          grade_earnings: Earnings from Grades
+          math_earnings: Earnings from Math
+          reading_earnings: Earnings from Reading
+          transaction_fees: Transaction Fees
+      user:
+        type: Role
+    errors:
+      models:
+        stock:
+          attributes:
+            company_website:
+              invalid: must be a valid HTTP or HTTPS URL
+  admin:
+    announcements:
+      create:
+        notice: Announcement created successfully.
+      destroy:
+        notice: Announcement deleted successfully.
+      update:
+        notice: Announcement updated successfully.
+    classrooms:
+      create:
+        notice: Classroom created successfully.
+      destroy:
+        notice: Classroom deleted successfully.
+      update:
+        notice: Classroom updated successfully.
+    grades:
+      create:
+        notice: Grade created successfully.
+      destroy:
+        notice: Grade deleted successfully.
+      update:
+        notice: Grade updated successfully.
+    portfolio_transactions:
+      create:
+        notice: Portfolio transaction created successfully.
+      destroy:
+        notice: Portfolio transaction deleted successfully.
+      update:
+        notice: Portfolio transaction updated successfully.
+    school_years:
+      create:
+        notice: School year created successfully.
+      destroy:
+        delete_restricted: Cannot delete school year because it has associated records.
+          Please remove all classrooms and quarters first.
+        notice: School year deleted successfully.
+      update:
+        notice: School year updated successfully.
+    schools:
+      create:
+        notice: School created successfully.
+      destroy:
+        notice: School deleted successfully.
+      update:
+        notice: School updated successfully.
+    stocks:
+      create:
+        notice: Stock created successfully.
+      destroy:
+        notice: Stock deleted successfully.
+      update:
+        notice: Stock updated successfully.
+    students:
+      add_transaction:
+        errors:
+          amount_blank: Amount must be present
+          reason_blank: Reason must be present
+          transaction_type_blank: Transaction Type must be present
+        notice: Transaction added successfully.
+      create:
+        notice: 'Student %{username} created successfully. Password: %{password}'
+      destroy:
+        notice: Student %{username} archived successfully.
+      restore:
+        notice: Student %{username} restored successfully.
+      update:
+        notice: Student updated successfully.
+    teachers:
+      create:
+        notice: Teacher created successfully. Password reset email has been sent.
+      deactivations:
+        create:
+          notice: Teacher %{username} deactivated successfully.
+      destroy:
+        must_be_deactivated: Teacher must be deactivated before permanent deletion.
+        notice: Teacher %{username} permanently deleted.
+      reactivations:
+        create:
+          notice: Teacher %{username} reactivated successfully.
+      update:
+        notice: Teacher updated successfully.
+    users:
+      create:
+        notice: User created successfully.
+      destroy:
+        notice: User deleted successfully.
+      update:
+        notice: User updated successfully.
+    years:
+      create:
+        notice: Year created successfully.
+      destroy:
+        notice: Year deleted successfully.
+      update:
+        notice: Year updated successfully.
+  announcements:
+    create:
+      notice: Announcement was successfully created.
+    destroy:
+      notice: Announcement was successfully destroyed.
+    not_found: Announcement not found.
+    update:
+      notice: Announcement was successfully updated.
+  application:
+    access_denied:
+      admin_required: Access denied. Admin privileges required.
+      no_access: You do not have access to this page.
+  classrooms:
+    archived:
+      alert: This classroom has been archived and is no longer accessible.
+    create:
+      notice: Classroom was successfully created.
+    destroy:
+      notice: Classroom was successfully destroyed.
+    toggle_trading:
+      alert: Unable to update trading status.
+      disabled: Trading has been disabled for this classroom.
+      enabled: Trading has been enabled for this classroom.
+    update:
+      notice: Classroom was successfully updated.
+  fields:
+    portfolio_path:
+      index:
+        portfolio: Portfolio
+  grade_books:
+    finalize:
+      already_completed: Cannot finalize because it's already completed.
+      incomplete: 'Cannot finalize: Some entries are incomplete.'
+      notice: Grade book finalized. Funds have been distributed.
+    flat_allotment:
+      failed: 'Could not give the flat allotment, so no student was paid: %{message}'
+      invalid_amount: Enter an amount greater than zero to give each student.
+      notice:
+        one: Gave %{amount} to %{count} student.
+        other: Gave %{amount} to %{count} students.
+  helpers:
+    label:
+      portfolio_transaction:
+        amount_cents: Amount
+      student:
+        portfolio_path: Portfolio Link
+  orders:
+    cancel:
+      confirm: Are you sure you want to cancel this order? This action cannot be undone.
+      pending_only: Only pending orders can be canceled
+      success: Order was successfully canceled
+      unauthorized: You can only cancel your own orders
+    create:
+      notice: Order was successfully created.
+    destroy:
+      notice: Order was successfully destroyed.
+    update:
+      notice: Order was successfully updated.
+  schools:
+    create:
+      notice: School was successfully created.
+    destroy:
+      notice: School was successfully destroyed.
+    update:
+      notice: School was successfully updated.
+  students:
+    add_transaction:
+      errors:
+        amount_blank: Amount must be present
+        reason_blank: Reason must be present
+        transaction_type_blank: Transaction Type must be present
+      success: Transaction added to student successfully.
+    create:
+      notice: 'Student %{username} created successfully. Initial password: %{password}'
+    destroy:
+      notice: Student %{username} deleted successfully.
+    generate_password:
+      notice: 'New password generated for %{username}: %{password}'
+    not_found: Student not found
+    reset_password:
+      notice: 'Password reset for %{username}. New password: %{password}'
+    update:
+      notice: Student updated successfully.
+  teachers:
+    create:
+      notice: Teacher created successfully. An account setup email has been sent.

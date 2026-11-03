@@ -1,0 +1,9 @@
+<div class="w-full">
+  <div class="flex justify-between items-center">
+    <h1 class="font-bold text-4xl">Schools</h1>
+    <%= link_to "New school", new_school_path, class: "rounded-lg py-3 px-5 bg-blue-600 text-white block font-medium" %>
+  </div>
+  <div id="schools" class="min-w-full">
+    <%= render @schools %>
+  </div>
+</div>

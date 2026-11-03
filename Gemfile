@@ -1,0 +1,64 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+ruby "3.4.4"
+
+gem "rails", "~> 8.1.4"
+
+gem "bootsnap", require: false
+gem "csv"
+gem "daemons"
+gem "devise", "~> 5.0"
+gem "faker", "~> 3.8.0"
+gem "font-awesome-rails"
+gem "image_processing", "~> 2.2"
+gem "importmap-rails"
+gem "jbuilder"
+gem "json", "< 4.0"
+gem "lucide-rails"
+gem "pg", "~> 1.7"
+gem "propshaft"
+gem "puma", ">= 5.0"
+gem "pundit", "~> 2.5"
+gem "ruby-vips"
+gem "shadcn-ui", "~> 0.0.15"
+gem "solid_queue", "~> 1.7"
+gem "stimulus-rails"
+gem "strong_migrations", "~> 2.8"
+gem "tailwindcss-rails"
+gem "turbo-rails"
+
+gem "discard", "~> 2.0"
+gem "tzinfo-data", platforms: %i[mingw mswin x64_mingw jruby]
+
+group :development, :test do
+  gem "brakeman", require: false
+  gem "bundler-audit", require: false
+  gem "debug", platforms: %i[mri mingw mswin x64_mingw]
+  gem "erb_lint", require: false
+  gem "pry", "~> 0.16.0"
+  gem "pry-byebug"
+  gem "rubocop"
+  gem "rubocop-rails"
+end
+
+group :development do
+  gem "bcrypt_pbkdf", "~> 1.0", require: false
+  gem "capistrano", "~> 3.20", require: false
+  gem "capistrano-bundler", "~> 2.1", require: false
+  gem "capistrano-rails", "~> 1.6", require: false
+  gem "capistrano-rbenv", "~> 2.2", require: false
+  gem "ed25519", "~> 1.3", require: false
+  gem "i18n-tasks"
+  gem "web-console"
+end
+
+group :test do
+  gem "capybara"
+  gem "factory_bot_rails"
+  gem "mocha"
+  gem "selenium-webdriver"
+  gem "simplecov", require: false
+  gem "webmock"
+end

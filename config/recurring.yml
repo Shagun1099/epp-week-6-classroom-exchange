@@ -1,0 +1,35 @@
+development: &default
+  daily_order_execution:
+    class: OrderExecutionJob
+    queue: default
+    # Every 15 minutes, every day
+    schedule: "*/15 * * * *"
+
+  daily_stock_prices_update:
+    class: StockPricesUpdateJob
+    queue: default
+    # Due to limitations of solid queue we need to use cron format for these schedules
+    # This is Monday through Friday at 9:00 PM EST (2:00 AM UTC Tues-Sat)
+    schedule: "0 2 * * 2-6"
+  
+  monthly_portfolio_snapshot:
+    class: MonthlyPortfolioSnapshotJob
+    queue: default
+    # This is the last day of the month each month
+    schedule: "0 23 L * *"
+  
+  # Stock attribute updates - runs weekly on Saturdays
+  weekly_stock_attribute_update:
+    class: StockAttributeUpdateJob
+    queue: default
+    # This is Saturday at 11:00 PM ET (4:00 AM UTC Sunday)
+    schedule: "0 4 * * 6"
+
+test:
+  # No recurring jobs in test environment
+
+staging:
+  <<: *default
+
+production:
+  <<: *default

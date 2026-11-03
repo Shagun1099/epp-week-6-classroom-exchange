@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+# Turn off command printing to keep output clean
+set -Eeuo pipefail
+
+# Use GitHub formatter for CI
+FORMATTER="progress"
+if [[ "${CI:-}" == "true" ]]; then
+  FORMATTER="github"
+fi
+
+# Execute linters, formatters, and static analysis tools
+bundle exec i18n-tasks check-normalized
+bundle exec rubocop -f "$FORMATTER"
+
+# Run ERB linting
+bundle exec erb_lint --lint-all
+
+# Security and audit checks
+bin/brakeman --no-pager --exit-on-warn --quiet
+bin/bundler-audit check --update
+bin/importmap audit
+
+echo ""
+echo "🎉 All checks passed!"
+echo ""

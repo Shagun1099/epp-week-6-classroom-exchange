@@ -1,0 +1,89 @@
+---
+services:
+  redis:
+    image: redis:7.0
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+    volumes:
+      - redis:/data
+
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      PGUSER: cx
+      POSTGRES_USER: cx
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: cx
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 5s
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  app:
+    build:
+      dockerfile: Dockerfile.dev
+      context: .
+    image: classroom-exchange:dev
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/up"]
+    entrypoint: bin/docker-entrypoint
+    command: ["bash", "-c", "bin/rails tailwindcss:build && bin/rails server -b 0.0.0.0 -p 3000"]
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    volumes:
+      - .:/rails
+      - bundle:/usr/local/bundle
+      - node_modules:/rails/node_modules
+    environment:
+      RAILS_ENV: development
+      DATABASE_URL: postgresql://cx:password@db/classroom_exchange_development
+      BROWSERSLIST_IGNORE_OLD_DATA: true
+      # Set to "on" to show the admin Test settings page (the hosted copy does)
+      CX_TEST_SETTINGS: ${CX_TEST_SETTINGS:-off}
+
+  # Runs the scheduled and background jobs, such as order execution
+  jobs:
+    image: classroom-exchange:dev
+    depends_on:
+      app:
+        condition: service_healthy
+    command: bin/jobs
+    volumes:
+      - .:/rails
+      - bundle:/usr/local/bundle
+      - node_modules:/rails/node_modules
+    environment:
+      RAILS_ENV: development
+      DATABASE_URL: postgresql://cx:password@db/classroom_exchange_development
+
+  # Runs only on request: docker compose run --rm test
+  test:
+    profiles: ["test"]
+    image: classroom-exchange:dev
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    entrypoint: bin/docker-entrypoint
+    command: bash -c "bin/rails db:prepare && bin/rails test"
+    volumes:
+      - .:/rails
+      - bundle:/usr/local/bundle
+      - node_modules:/rails/node_modules
+    environment:
+      RAILS_ENV: test
+      DATABASE_URL: postgresql://cx:password@db/classroom_exchange_test
+
+volumes:
+  redis:
+  postgres:
+  bundle:
+  node_modules:

@@ -1,0 +1,81 @@
+# frozen_string_literal: true
+
+Rails.application.routes.draw do
+  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
+  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  get "up" => "rails/health#show", :as => :rails_health_check
+
+  root "home#index"
+
+  devise_for :users
+
+  devise_scope :user do
+    get "users/sign_up", to: redirect("/")
+  end
+
+  resources :users do
+    resources :portfolios, only: :show
+  end
+
+  resources :classrooms, except: [:destroy] do
+    member do
+      patch :toggle_trading
+    end
+    resources :grade_books, only: %i[show update] do
+      member do
+        post :finalize
+        post :flat_allotment
+      end
+    end
+    resources :students, except: %i[index show] do
+      member do
+        patch :reset_password
+        patch :generate_password
+      end
+    end
+    resources :classroom_enrollments, only: %i[create destroy] do
+      member do
+        patch :unenroll
+      end
+    end
+  end
+
+  # In-house admin (formerly admin_v2 at /admin-new, now at /admin)
+  namespace :admin do
+    root "dashboard#index"
+
+    resources :announcements
+    resources :classrooms, except: [:destroy] do
+      member do
+        patch :toggle_archive
+      end
+    end
+    resources :schools
+    resources :school_years
+    resources :stocks
+    resources :students do
+      member do
+        patch :restore
+        post :add_transaction
+      end
+    end
+    resources :teachers do
+      resource :deactivation, only: [:create], controller: "teachers/deactivations"
+      resource :reactivation, only: [:create], controller: "teachers/reactivations"
+    end
+    resources :users
+    resources :portfolio_transactions, except: [:index]
+    resource :test_settings, only: [:show] do
+      post :run_pending_orders
+    end
+  end
+
+  resources :orders do
+    member do
+      patch :cancel
+    end
+  end
+  resources :portfolios, only: :show
+  resources :stocks, only: %i[show index]
+  resources :announcements, only: :show
+end

@@ -1,0 +1,40 @@
+# Adds what the hosted copy needs on top of docker-compose.yml.
+# Used by scripts/deploy.sh. See deployment.md.
+services:
+  # Serves the app over HTTPS
+  proxy:
+    image: caddy:2
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN is not set}
+    ports:
+      - "${PROXY_HTTP_PORT:-80}:80"
+      - "${PROXY_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+
+  app:
+    restart: unless-stopped
+    # Only the proxy can reach the app
+    ports: !reset []
+    environment:
+      CX_HOSTED: "on"
+      CX_TEST_SETTINGS: "on"
+      DOMAIN: ${DOMAIN}
+
+  jobs:
+    restart: unless-stopped
+    environment:
+      CX_HOSTED: "on"
+      DOMAIN: ${DOMAIN}
+
+  redis:
+    restart: unless-stopped
+
+volumes:
+  caddy-data:
+  caddy-config:

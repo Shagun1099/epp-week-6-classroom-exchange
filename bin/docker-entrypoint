@@ -1,0 +1,10 @@
+#!/bin/bash -e
+
+# If running the rails server, clear a stale pid file and create, migrate and
+# seed the database if needed
+if [[ "$*" == *"rails server"* ]]; then
+  rm -f tmp/pids/server.pid
+  bin/rails db:prepare
+fi
+
+exec "${@}"
