@@ -5,9 +5,9 @@ class StockPricesUpdateJob < ApplicationJob
 
   retry_on StandardError, wait: :exponentially_longer, attempts: 3
 
-  def perform(...)
+  def perform(real_source: AlphaVantageApiClient.new)
     Rails.logger.info "Starting stock prices update job at #{Time.current}"
-    @api_client = AlphaVantageApiClient.new
+    @api_client = real_source
 
     stock_count = Stock.count
     Rails.logger.info "Found #{stock_count} stocks to update"
