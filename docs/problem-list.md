@@ -1,17 +1,26 @@
 # Problem list
 
 Findings from the initial inspection of the codebase before any changes were made.
-Decisions and outcomes will be filled in after implementation.
+Decisions and outcomes filled in after implementation.
 
 ---
 
-## 1. StockPricesUpdateJob hard-codes AlphaVantageApiClient
+## 1. StockPricesUpdateJob hard-codes AlphaVantageApiClient — FIXED
 
-- **Where:** `app/jobs/stock_prices_update_job.rb` — `@api_client = AlphaVantageApiClient.new` on the first line of `perform`.
-- **What depends on what:** The job (business policy: update stock prices on a schedule) directly constructs its own external price source (technical detail: the AlphaVantage HTTP API). Business logic depends on an infrastructure class name, with no way to substitute another source.
-- **Decision:** Invert — this is the dependency that blocks the simulated market feature. `perform` should accept an injectable price source rather than constructing `AlphaVantageApiClient` itself.
-- **Why:** If the job hard-codes `AlphaVantageApiClient.new`, it is impossible to pass in a `SimulatedPriceSource` for simulated stocks without modifying the job. Injecting the client as a keyword argument (with `AlphaVantageApiClient.new` as the default) leaves all existing callers unchanged while enabling a simulated market path.
-- **What it costs to leave it as it is:** The simulated market feature cannot be built without modifying the job every time a new price source is needed. Tests must stub the HTTP layer rather than injecting a lightweight stand-in.
+- **Where:** `app/jobs/stock_prices_update_job.rb` — originally `@api_client = AlphaVantageApiClient.new` on the first line of `perform`.
+- **What depends on what:** The job (business policy: update stock prices on a schedule) directly constructed its own external price source (technical detail: the AlphaVantage HTTP API). Business logic depended on an infrastructure class name, with no way to substitute another source.
+- **Decision:** Inverted. `perform` now accepts two injectable keyword arguments:
+  ```ruby
+  def perform(simulated_source: SimulatedPriceSource.new, real_source: AlphaVantageApiClient.new)
+  ```
+  Each stock picks its source at the top of the loop — `stock.simulated? ? simulated_source : real_source` — before the unchanged private business-logic methods run.
+- **Why:** This was the single change required to unlock the simulated market. `SimulatedPriceSource` and `AlphaVantageApiClient` are now interchangeable from the job's perspective because both respond to `fetch_quote(symbol)`. Neither the update rules (yesterday's price, trading-day skip, cents conversion) nor the private methods needed modification.
+- **What was also delivered:**
+  - `app/services/simulated_price_source.rb` — returns a deterministic ±2% price movement using `SHA2("#{symbol}-#{date}")` as the seed. No API key required.
+  - `simulated` boolean column on `stocks` (migration `20261105000001`, `default: false, null: false`).
+  - Seed data: all 10 fictional companies marked `simulated: true`.
+  - Admin stock form: `simulated` checkbox added alongside `archived`.
+  - 11 new tests covering the simulated source, source routing, and the stand-in injection seam.
 
 ---
 
