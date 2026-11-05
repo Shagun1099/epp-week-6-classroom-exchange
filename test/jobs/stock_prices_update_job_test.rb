@@ -122,4 +122,57 @@ class StockPricesUpdateJobTest < ActiveJob::TestCase
     assert_equal @last_trading_date, stock.last_trading_day
     assert stock.price_cents.positive?
   end
+
+  # -- Characterisation tests --------------------------------------------------
+  # These tests pin the exact current behaviour as a safety net before the
+  # AlphaVantageApiClient dependency is inverted.
+
+  test "uses AlphaVantageApiClient as the default real price source" do
+    create(:stock, ticker: "AAPL")
+
+    mock_client = mock("alpha_vantage_client")
+    mock_client.stubs(:fetch_quote).returns(nil)
+    AlphaVantageApiClient.expects(:new).once.returns(mock_client)
+
+    StockPricesUpdateJob.perform_now
+  end
+
+  test "updates price_cents and last_trading_day from API response" do
+    # global_quote_f.json: price "12.1300", trading day "2024-05-31"
+    stock = create(:stock, ticker: "F", price_cents: 5_00, last_trading_day: @last_trading_date - 1.day)
+
+    StockPricesUpdateJob.perform_now
+
+    stock.reload
+    assert_equal 1213, stock.price_cents
+    assert_equal @last_trading_date, stock.last_trading_day
+  end
+
+  test "converts decimal price string to integer cents" do
+    # "12.1300" → (12.13.to_f * 100).to_i = 1213
+    stock = create(:stock, ticker: "F", price_cents: 0, last_trading_day: nil)
+
+    StockPricesUpdateJob.perform_now
+
+    assert_equal 1213, stock.reload.price_cents
+  end
+
+  test "preserves yesterday price when quote is returned with no trading day" do
+    # Distinct from "preserves yesterday price when API call fails": here the
+    # client returns a Global Quote with a price but the trading-day field is
+    # absent, exercising the `unless price && trading_day` guard in the job.
+    initial_price = 10_000
+    stock = create(:stock, ticker: "AAPL", price_cents: initial_price, yesterday_price_cents: nil)
+
+    stub_request(:get, STOCK_URL_MATCHER).to_return(
+      status: 200,
+      body: { "Global Quote" => { "05. price" => "150.00" } }.to_json
+    )
+
+    StockPricesUpdateJob.perform_now
+
+    stock.reload
+    assert_equal initial_price, stock.price_cents
+    assert_equal initial_price, stock.yesterday_price_cents
+  end
 end
