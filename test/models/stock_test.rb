@@ -21,6 +21,22 @@ class StockTest < ActiveSupport::TestCase
     assert_equal false, stock.archived
   end
 
+  test "simulated defaults to false" do
+    stock = create(:stock)
+
+    assert_equal false, stock.simulated
+  end
+
+  test "simulated and real scopes filter correctly" do
+    real_stock = create(:stock)
+    simulated_stock = create(:stock, :simulated)
+
+    assert_includes Stock.real, real_stock
+    assert_not_includes Stock.real, simulated_stock
+    assert_includes Stock.simulated, simulated_stock
+    assert_not_includes Stock.simulated, real_stock
+  end
+
   test "active and archived scopes filter correctly" do
     active_stock = create(:stock, archived: false)
     archived_stock = create(:stock, archived: true)

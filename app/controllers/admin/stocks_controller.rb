@@ -100,6 +100,7 @@ module Admin
           management
           competitor_names
           archived
+          simulated
         ]
       )
     end

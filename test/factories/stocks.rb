@@ -20,5 +20,9 @@ FactoryBot.define do
     cash_flow { 1_000_000.00 }
     debt { 500_000.00 }
     price_cents { 12_500 } # $125.00
+
+    trait :simulated do
+      simulated { true }
+    end
   end
 end

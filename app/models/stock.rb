@@ -15,6 +15,8 @@ class Stock < ApplicationRecord
 
   scope :active, -> { where(archived: false) }
   scope :archived, -> { where(archived: true) }
+  scope :simulated, -> { where(simulated: true) }
+  scope :real, -> { where(simulated: false) }
 
   def current_price
     price_cents.to_f / 100

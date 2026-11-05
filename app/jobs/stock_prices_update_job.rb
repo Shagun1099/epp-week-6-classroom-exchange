@@ -5,9 +5,8 @@ class StockPricesUpdateJob < ApplicationJob
 
   retry_on StandardError, wait: :exponentially_longer, attempts: 3
 
-  def perform(real_source: AlphaVantageApiClient.new)
+  def perform(simulated_source: SimulatedPriceSource.new, real_source: AlphaVantageApiClient.new)
     Rails.logger.info "Starting stock prices update job at #{Time.current}"
-    @api_client = real_source
 
     stock_count = Stock.count
     Rails.logger.info "Found #{stock_count} stocks to update"
@@ -16,8 +15,9 @@ class StockPricesUpdateJob < ApplicationJob
 
     updated_count = 0
     Stock.find_each do |stock|
+      @api_client = stock.simulated? ? simulated_source : real_source
       updated_count += 1 if update_stock_price(stock)
-      sleep(1.1) # To rate limit
+      sleep(1.1) unless stock.simulated? # rate-limit real API calls only
     end
 
     Rails.logger.info "Stock prices update job completed: #{updated_count}/#{stock_count} stocks updated successfully"

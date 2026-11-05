@@ -112,6 +112,10 @@
       </div>
 
       <div class="mt-6 pt-6 border-t border-gray-200">
+        <%= f.boolean_field :simulated,
+                            label: "Simulated",
+                            hint: "Prices are computed by the simulator instead of fetched from the market" %>
+
         <%= f.boolean_field :archived,
                             label: "Archived",
                             hint: "Mark this stock as archived (hidden from active listings)" %>

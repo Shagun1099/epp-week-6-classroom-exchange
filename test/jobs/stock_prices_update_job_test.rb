@@ -157,6 +157,51 @@ class StockPricesUpdateJobTest < ActiveJob::TestCase
     assert_equal 1213, stock.reload.price_cents
   end
 
+  test "runs without AlphaVantageApiClient when a stand-in source is injected" do
+    stock = create(:stock, ticker: "AAPL", price_cents: 10_000, last_trading_day: nil)
+
+    stand_in = Object.new
+    def stand_in.fetch_quote(_symbol)
+      { "05. price" => "105.00", "07. latest trading day" => Date.today.to_s }
+    end
+
+    StockPricesUpdateJob.perform_now(real_source: stand_in)
+
+    stock.reload
+    assert_equal 10_500, stock.price_cents
+    assert_equal Date.today, stock.last_trading_day
+  end
+
+  test "routes simulated stocks to SimulatedPriceSource" do
+    stock = create(:stock, :simulated, ticker: "FAKE", price_cents: 10_000, last_trading_day: nil)
+
+    mock_simulated = mock("simulated_source")
+    mock_simulated.expects(:fetch_quote).with("FAKE").returns(
+      { "05. price" => "101.00", "07. latest trading day" => Date.today.to_s }
+    )
+    mock_real = mock("real_source")
+    mock_real.expects(:fetch_quote).never
+
+    StockPricesUpdateJob.perform_now(simulated_source: mock_simulated, real_source: mock_real)
+
+    assert_equal 10_100, stock.reload.price_cents
+  end
+
+  test "routes real stocks to AlphaVantageApiClient" do
+    stock = create(:stock, ticker: "AAPL", price_cents: 10_000, last_trading_day: nil)
+
+    mock_real = mock("real_source")
+    mock_real.expects(:fetch_quote).with("AAPL").returns(
+      { "05. price" => "105.00", "07. latest trading day" => Date.today.to_s }
+    )
+    mock_simulated = mock("simulated_source")
+    mock_simulated.expects(:fetch_quote).never
+
+    StockPricesUpdateJob.perform_now(simulated_source: mock_simulated, real_source: mock_real)
+
+    assert_equal 10_500, stock.reload.price_cents
+  end
+
   test "preserves yesterday price when quote is returned with no trading day" do
     # Distinct from "preserves yesterday price when API call fails": here the
     # client returns a Global Quote with a price but the trading-day field is
